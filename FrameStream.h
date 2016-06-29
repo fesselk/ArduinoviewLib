@@ -17,19 +17,19 @@
 
 //{Serial.print(head,HEX);}
 
-#define begineventlist(NAME) void NAME##eventlist(Framereader &frm_in){\
-    uint16_t head = (frm_in.frame()[0] << 8) | (frm_in.frame()[1]);
-#define event(ID,event_function)\
+#define beginrunnerlist(NAME) void NAME##runnerlist(char * frm , size_t len){\
+    uint16_t head = (frm[0] << 8) | (frm[1]);
+#define runner(ID,runner_function)\
     uint16_t CAT(fnhead,__LINE__) = (#ID[0] << 8)+ #ID[1];\
-    if (CAT(fnhead,__LINE__)  == head) event_function(frm_in.frame(),frm_in.length())
-#define endeventlist() }
+    if (CAT(fnhead,__LINE__)  == head) runner_function(frm,len)
+#define endrunnerlist() }
 
-// begineventlist();
-// event(!!,gui_init);
-// event(BB,test);
-// endeventlist();
+// beginrunnerlist();
+// runner(!!,gui_init);
+// runner(BB,test);
+// endrunnerlist();
 
-void eventlist(Framereader&);
+void runnerlist(char * frm , size_t len);
 
 struct FrameStream : public Print{
     StringtoFrame framer;
@@ -61,17 +61,18 @@ struct FrameStream : public Print{
         
     }
     
-    void run(){
+    bool run(){
         if (ser.available())                              // wait for SYNC package
         {
             if(deframer.length()==0)
                 deframer.put(ser.read());
             if(deframer.length() != 0){ // frame might be complete after puting char in
                 if(deframer.length() >= 2)
-                    eventlist(deframer);
+                    runnerlist(deframer.frame(),deframer.length());
                 deframer.clearframe();
             }
         }
+        return ser.available();
     }
     
 //     int available();

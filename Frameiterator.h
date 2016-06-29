@@ -7,6 +7,9 @@
 #define ESC     0x10
 #define ESCMASK 0x40
 
+// make a uint16_t from a String using this with string literal creates just the int value 
+#define StrInt( Str ) (uint16_t) ((Str[1] << 8) + Str[0])
+
 /** StringtoFrame 
  * converts a string to a Frame by enclosing it in SOF and EOF following the arduinoview definition
  */
@@ -33,7 +36,6 @@ struct StringtoFrame{
         this->status.end   = false;
         this->status.frame = status.out;
         this->status.type  = status.tstring;
-        
     }
 
     StringtoFrame(const char* str){
@@ -66,13 +68,24 @@ struct StringtoFrame{
         this->status.type  = status.tstring;
     }
 
+    StringtoFrame(const uint16_t val, size_t  length ){
+        //two bytes by value to frame
+        //!! uint16_t is litte endian
+        this->val          = val;
+        this->length       = length<=2?length:2;
+        this->i            = 0;
+        this->status.end   = false;
+        this->status.frame = status.out;
+        this->status.type  = status.tvalue;
+    }
+
     bool addString(const char* str){
         //add an zero terminated string
         if ( this->done() ){
             this->str          = str;
             this->length       = strlen(str);
             this->i            = 0;
-            this->status.type  = status. tstring;
+            this->status.type  = status.tstring;
             return true;
         }else
             return false;
@@ -103,8 +116,8 @@ struct StringtoFrame{
     }
 
     bool addString(const uint16_t val, size_t  length ){
-        //add up too two bytes by value to frame 
-        //!! uint16_t is litte endian 
+        //add up too two bytes by value to frame
+        //!! uint16_t is litte endian
         if ( this->done() && length <= 2){
             this->val         = val;
             this->length      = length;
@@ -166,13 +179,11 @@ struct StringtoFrame{
     bool done(){
         return (i==length);
     }
-    
-    
+
     bool end(){
         status.end=true;
         return (status.frame==status.out && i==length);
     }
-    
     bool begin(){
         this->length       = 0;
         this->i            = 0;
@@ -180,7 +191,7 @@ struct StringtoFrame{
         this->status.frame = status.out;
         this->status.type  = status.tstring;
     }
-    
+
 };
 
 /** Framereader contains a buffer to read Frames
@@ -189,21 +200,21 @@ struct StringtoFrame{
  */
 
 
-#ifndef READERSIZE
-#define READERSIZE 200
+#ifndef FRAMEREADERSIZE
+#define FRAMEREADERSIZE 200
 #endif
 struct Framereader {
 
     struct{ enum{ in,esc,out,end }frame : 4;} status;
-    int i = 0;
-    const int size =READERSIZE;
+    size_t i = 0;
+    const int size =FRAMEREADERSIZE;
     //char stringReceived[size];
-    char stringReceived[READERSIZE];
-    //Framereader(size_t size=READERSIZE):size(size){};
+    char stringReceived[FRAMEREADERSIZE];
+    //Framereader(size_t size=FRAMEREADERSIZE):size(size){};
     
     Framereader(){};
 
-    void put(char c) {
+    size_t put(char c) {
         if( i >= size){
             // frame to large prevent overun
             status.frame == status.out;
@@ -238,11 +249,14 @@ struct Framereader {
                 i = 0;
                 stringReceived[i] = 0;
             }
+        }else if ( status.frame == status.end ){
+            return 0;
         }
+        return i;
     }
 
     // length returns length of recived frame 0 if noframe complete
-    int length() { return status.frame == status.end?i:0; }
+    size_t length() { return status.frame == status.end?i:0; }
 
     // returns pointer to frame buffer if frame complete
     char * frame(){ return status.frame == status.end?stringReceived:0; }
