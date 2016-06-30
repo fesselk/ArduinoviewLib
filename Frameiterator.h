@@ -1,22 +1,23 @@
 #pragma once
 #include <string.h>
 #include <avr/pgmspace.h>
+#include <WString.h>
 
 #define SOF     0x01
 #define EOF     0x04
 #define ESC     0x10
 #define ESCMASK 0x40
 
-// make a uint16_t from a String using this with string literal creates just the int value 
+// make a uint16_t from a String using this with string literal creates just the int value
 #define StrInt( Str ) (uint16_t) ((Str[1] << 8) + Str[0])
 
-/** StringtoFrame 
+/** StringtoFrame
  * converts a string to a Frame by enclosing it in SOF and EOF following the arduinoview definition
  */
 struct StringtoFrame{
 //class withstatus.out privacy
-    struct{ 
-        enum{ in, esc, out }frame : 4; 
+    struct{
+        enum{ in, esc, out }frame : 4;
         enum{ tstring, pgm_tstring, tvalue }type: 2;
         bool end:1;
     }status;
@@ -52,6 +53,16 @@ struct StringtoFrame{
         //programm memory String
         this->str          = str_p;
         this->length       = strlen_P(str_p);
+        this->i            = 0;
+        this->status.end   = false;
+        this->status.frame = status.out;
+        this->status.type  = status.pgm_tstring;
+    }
+
+    StringtoFrame(const __FlashStringHelper *str_p){
+        //programm memory String
+        this->str          = reinterpret_cast<PGM_P>(str_p);
+        this->length       = strlen_P(reinterpret_cast<PGM_P>( str_p));
         this->i            = 0;
         this->status.end   = false;
         this->status.frame = status.out;
@@ -103,7 +114,18 @@ struct StringtoFrame{
             return false;
 
     }
+    bool addString(const __FlashStringHelper *str_p){
+        //add programm memory String to frame
+        if ( this->done() ){
+            this->str          = reinterpret_cast<PGM_P>(str_p);
+            this->length       = strlen_P(reinterpret_cast<PGM_P>(str_p));
+            this->i            = 0;
+            this->status.type  = status.pgm_tstring;
+            return true;
+        }else
+            return false;
 
+    }
     bool addString(const char* str, size_t  length){
         if ( this->done() ){
             this->str          = str;
@@ -196,7 +218,7 @@ struct StringtoFrame{
 
 /** Framereader contains a buffer to read Frames
  * interpretes each character given by calling put(c) until a frame is complete it returns a length() of 0 if the frame is length() returns the number of bytes that are in the frame.
- * 
+ *
  */
 
 
@@ -211,7 +233,7 @@ struct Framereader {
     //char stringReceived[size];
     char stringReceived[FRAMEREADERSIZE];
     //Framereader(size_t size=FRAMEREADERSIZE):size(size){};
-    
+
     Framereader(){};
 
     size_t put(char c) {
