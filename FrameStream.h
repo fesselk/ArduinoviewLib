@@ -5,25 +5,34 @@
 #define INNERCAT(x, y) x ## y
 #define CAT(x, y) INNERCAT(x, y)
 
+#define declarerunnerlist(NAME) void NAME##runnerlist(char * frm , size_t len)
+
 #define beginrunnerlist(NAME) void NAME##runnerlist(char * frm , size_t len){\
     if (len<2) return;\
     uint16_t head = (frm[0] << 8) | (frm[1]);
-#define runner(ID,runner_function)\
+#define runner(ID,runner_function) idrunner(ID,runner_function)
+#define idrunner(ID,runner_function)\
     uint16_t CAT(fnhead,__LINE__) = (#ID[0] << 8)+ #ID[1];\
     if (CAT(fnhead,__LINE__)  == head) runner_function(frm,len)
 #define fwdrunner(ID,runner_function)\
     uint16_t CAT(fnhead,__LINE__) = (#ID[0] << 8)+ #ID[1];\
     if (CAT(fnhead,__LINE__)  == head) runner_function(&frm[2],(len-2))
+#define callrunner(ID,runner_function)\
+    uint16_t CAT(fnhead,__LINE__) = (#ID[0] << 8)+ #ID[1];\
+    if (CAT(fnhead,__LINE__)  == head) runner_function()
 #define endrunnerlist() }
 
-// beginrunnerlist(g);
-// endrunnerlist();
+// declarerunnerlist(GUI)
 //
 // beginrunnerlist();
-// runner(!!,gui_init);
+// callrunner(!!,gui_init);
+// fwdrunner(!g,GUIrunnerlist);
 // runner(BB,test);
-// fwdrunner(!g,grunnerlist);
 // endrunnerlist();
+//
+// beginrunnerlist(GUI);
+// endrunnerlist();
+
 
 void runnerlist(char * frm , size_t len);
 

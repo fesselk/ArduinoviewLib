@@ -3,8 +3,8 @@
 #include <avr/pgmspace.h>
 #include <WString.h>
 
-#define SOF     0x01
-#define EOF     0x04
+#define SOFRM   0x01
+#define EOFRM   0x04
 #define ESC     0x10
 #define ESCMASK 0x40
 
@@ -12,7 +12,7 @@
 #define StrInt( Str ) (uint16_t) ((Str[1] << 8) + Str[0])
 
 /** StringtoFrame
- * converts a string to a Frame by enclosing it in SOF and EOF following the arduinoview definition
+ * converts a string to a Frame by enclosing it in SOFRM and EOFRM following the arduinoview definition
  */
 struct StringtoFrame{
 //class withstatus.out privacy
@@ -168,7 +168,7 @@ struct StringtoFrame{
       if(status.frame==status.in){
             if(i < length){
                 char c= getc(i);
-                if( c==SOF || c==EOF || c==ESC ){
+                if( c==SOFRM || c==EOFRM || c==ESC ){
                     status.frame=status.esc;
                     ret = ESC;
                 }else{
@@ -178,7 +178,7 @@ struct StringtoFrame{
             }else{
                 if (status.end) {
                     //end if asked to end
-                    ret = EOF;
+                    ret = EOFRM;
                     status.frame=status.out;
                 }
             }
@@ -189,7 +189,7 @@ struct StringtoFrame{
             i++;
         }else if(status.frame==status.out){
             if(i==0){
-                ret=SOF;
+                ret=SOFRM;
                 status.frame=status.in;
             }else{
                 ret = 0;
@@ -243,12 +243,12 @@ struct Framereader {
             i = 0;
         }
         if(status.frame == status.in){
-            if( c == SOF){
+            if( c == SOFRM){
                 //lost a frame but go on with a new one
                 status.frame = status.in;
                 i = 0;
                 stringReceived[i] = 0;
-            }else if( c == EOF){
+            }else if( c == EOFRM){
                 //frame complete
                 stringReceived[i] = 0;
                 status.frame  = status.end;
@@ -265,7 +265,7 @@ struct Framereader {
             i++;
             status.frame  = status.in;
         }else if( status.frame == status.out){
-            if( c == SOF){
+            if( c == SOFRM){
                 // start a new frame
                 status.frame  = status.in;
                 i = 0;
