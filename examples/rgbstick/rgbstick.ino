@@ -1,10 +1,10 @@
 //
 // Joystick
-//A1 15 = gnd
-//A2 16 = vcc
-//A3 17 = X
-//A4 18 = Y
-//A5 19 = sw
+//A1 = gnd
+//A2 = vcc
+//A3 = X
+//A4 = Y
+//A5 = sw
 
 // RGB
 // 2 = GND
@@ -76,14 +76,14 @@ Sensor joy, joymin, joymax;
 
 void JoystickInit() {
     // setup power GND VCC
-    pinMode(15, OUTPUT);
-    pinMode(16, OUTPUT);
-    digitalWrite(15, 0);
-    digitalWrite(16, 1);
+    pinMode(A1, OUTPUT);
+    pinMode(A2, OUTPUT);
+    digitalWrite(A1, 0);
+    digitalWrite(A2, 1);
     // Analog in
-    pinMode(17, INPUT);
-    pinMode(18, INPUT);
-    pinMode(19, INPUT);
+    pinMode(A3, INPUT);
+    pinMode(A4, INPUT);
+    pinMode(A5, INPUT);
 
     joymin.x = joymin.y = 0x7fff;
     joymax.x = joymax.y = 0;
@@ -286,9 +286,9 @@ void checkSerial(){
 void loop() {
     static StringtoFrame I;
     runRGB();
-    
+
     checkSerial();
-    
+
     if (start == true){
         {
             //Duty d= Duty(13);
