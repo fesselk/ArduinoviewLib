@@ -26,6 +26,20 @@ endrunnerlist();
 
 int ledPin = 13;      // LED connected to digital pin 9
 
+// Power Pins
+// VSS      GND
+// VDD      5V
+// V0       potentiometer or PWM Pin
+// A        3.3V or with resitor to 5V or to PWM Pin
+// K        GND
+
+// Data Pins
+// RW       GND
+// RS       Pin 8
+// EN       9
+// D4 - D7  4-7
+
+//LiquidCrystal(rs, enable, d4, d5, d6, d7)
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 void textCallback(char * str, size_t length){
@@ -36,6 +50,8 @@ void textCallback(char * str, size_t length){
 }
 
 void sliderCallback(char * str, size_t length){
+  //PWMPin 11 for V0 (contrast pin)
+  //analogWrite(11,atoi(str));
   lcd.setCursor(0, 1);
   lcd.print("                ");
   lcd.setCursor(0, 1);
@@ -76,5 +92,4 @@ void setup() {
 
 void loop() {
   frm.run();
-  delay(20);
 }
