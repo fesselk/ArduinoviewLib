@@ -1,0 +1,38 @@
+#######################################
+# Syntax Coloring Map
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+StringtoFrame	KEYWORD1
+Framereader	KEYWORD1
+
+FramePrint	KEYWORD1
+FrameStream	KEYWORD1
+FrameRun	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+run	KEYWORD2
+end	KEYWORD2
+
+#######################################
+# Structures (KEYWORD3)
+#######################################
+
+beginrunnerlist	KEYWORD3
+runner	KEYWORD3
+idrunner	KEYWORD3
+fwdrunner	KEYWORD3
+callrunner	KEYWORD3
+endrunnerlist	KEYWORD3
+
+######################################
+# Constants (LITERAL1)
+#######################################
+
